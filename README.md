@@ -21,7 +21,7 @@ A self-hosted Minecraft server built from a repurposed desktop PC, running headl
  
 - First I found an old unused pc and tried installing Ubuntu Server on it. The motherboard couldn't read all the files that was on the flash drive I used so i opted instead on installing the ISO Image on a SSD.
 - After the installation and setup of the OS was done docker was then installed and with that a minecraft server image was added as a container.
-- Using the <compose.yaml> file
+- Using the `compose.yaml` file I set up the mc service and environment.
 - **CurseForge API errors (HTTP 403):** confirmed the API key was valid by testing it directly with `curl`, then used debug logs to identify request throttling during the modpack install.
 - **Server stopping right after start:** read `latest.log` and used `docker inspect` (exit code, OOM status) to find an incompatible world from an earlier server version.
 - **Exposing the server without router access:** used playit.gg tunnels instead of port forwarding, since I don't control the router.
@@ -96,3 +96,31 @@ Use these in the server console, or in-game chat with a `/` in front.
 | Command | Description |
 |---|---|
 | `wakepc` (or `wakeonlan 34:5A:60:6F:E8:F4`) | Wake up the main PC |
+
+## Docker compose.yaml File
+`services:
+  mc:
+    image: itzg/minecraft-server:java21
+    container_name: minecraft
+    ports:
+      - "25565:25565"
+    environment:
+      EULA: "TRUE"
+      TYPE: "AUTO_CURSEFORGE"
+      CF_API_KEY: "$$2a$$10$$UpWS3sao8ZEZYcrjdJ8bc.zS3oMqqXdl6PewdOo7lGoF37lk3vPYq"
+      CF_SLUG: "custom"
+      CF_FORCE_SYNCHRONIZE: "true"
+      CF_MODPACK_ZIP: "/data/OriginsPack.zip"
+      MEMORY: "12G"
+      VIEW_DISTANCE: "16"
+      SIMULATION_DISTANCE: "8"
+      DEBUG_HELPER: "true"
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+    secrets:
+      - cf_api_key
+  playit:
+    image: ghcr.io/playit-cloud/playit-agent:latest`
