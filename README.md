@@ -29,16 +29,16 @@ A self-hosted Minecraft server built from a repurposed desktop PC, running headl
 | Command | Description |
 |---|---|
 | `ssh fabian@192.168.0.221` | SSH into the server on the home network |
-| `ssh fabian@homeserver` | SSH into the server via Tailscale (works from anywhere) |
+| `ssh fabian@home-server` | SSH into the server via Tailscale (works from anywhere) |
 | `cd /srv/minecraft` | Go to the Minecraft project folder (run `docker compose` commands from here) |
  
 ## Files
  
 | Command | Description |
 |---|---|
-| `scp "C:\Users\mrbaz\Downloads\[Data Pack].zip" fabian@homeserver:/srv/minecraft/data/world/datapacks/` | Send a data pack (run on PC) |
-| `scp "C:\Users\mrbaz\Downloads\OriginsPack.zip" fabian@homeserver:/srv/minecraft/data/` | Send an updated modpack (run on PC) |
-| `scp fabian@homeserver:/srv/minecraft/[file] .` | Copy a file from the server to the PC (run on PC) |
+| `scp "C:\Users\mrbaz\Downloads\[Data Pack].zip" fabian@home-server:/srv/minecraft/data/world/datapacks/` | Send a data pack (run on PC) |
+| `scp "C:\Users\mrbaz\Downloads\OriginsPack.zip" fabian@home-server:/srv/minecraft/data/` | Send an updated modpack (run on PC) |
+| `scp fabian@home-server:/srv/minecraft/[file] .` | Copy a file from the server to the PC (run on PC) |
 | `nano compose.yaml` | Edit the compose file (Ctrl+O save, Ctrl+X exit) |
  
 ## Docker
