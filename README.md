@@ -25,6 +25,12 @@ A self-hosted Minecraft server built from a repurposed desktop PC, running headl
 - I used `scp` to send the modpack from my PC to the server and then added the proper API key and CF settings to the environment and tested.
 - The server failed with an API key error. The log said dollar signs had to be escaped, so I doubled every $ in the key. It still failed with HTTP 403, so I tested the key directly against the CurseForge API with curl and got 200, which meant the key itself was valid. Debug logging showed that one request in a burst was being refused, so the real cause was rate limiting, made worse by the container’s restart loop. I stopped the container, waited for the limit to reset, and the install went through.
 - After the API problem was fixed I went on and installed performance enhancing mods that alleviate some of the work for the cpu and ram. I then sent the new modpack to the server again using `scp` and tested it.
+- To let friends join from outside my network I decided to not use portforwarding. Instead I used playit.gg, which tunnels traffic to the server without any router changes. I added the playit agent as a second container in `compose.yaml` with host networking, so it can reach the Minecraft.
+- The game and the voice chat use different protocols, so they needed separate tunnels. Minecraft itself runs over TCP on port 25565, while the Simple Voice Chat mod sends audio over UDP on port 24454. I mapped `24454:24454/udp` in `compose.yaml` and created two tunnels in playit.gg: a Minecraft Java tunnel (TCP) and a Simple Voice Chat tunnel (UDP). I then configured `voicechat-server.properties` with `bind_address=*` so the mod listens on all interfaces, and `voice_host` set to the UDP tunnel's public address so players' clients connect through it. My first attempt put the tunnel address in `bind_address`, which is the server's local listening address, so I moved it to `voice_host`.
+- Since playit.gg makes the server reachable by anyone who finds the address, I turned on the whitelist (`whitelist on`, `whitelist add [name]`) so only invited players can join.
+- I added a datapack (GhastianOrigin) by copying it from my PC to `world/datapacks/` with `scp` and loading it with `reload` in the server console.
+- For my own remote access I installed Tailscale on the server. It creates a private, encrypted network between my devices, so I can reach the server's SSH console and the Cockpit web dashboard from anywhere without exposing either to the internet. Neither port is open publicly; they're only reachable through Tailscale.
+- I also used the server to solve a separate problem: waking my main PC remotely for game streaming. Wake-on-LAN packets from outside were blocked by the network, but the server is always on and sits on the same local network. I installed `wakeonlan` on the server, found my PC's MAC address with `ipconfig /all`, and created a `wakepc` alias. Now I can SSH into the server over Tailscale and send the magic packet locally.
 
 ## Connect
  
@@ -122,8 +128,6 @@ services:
     restart: unless-stopped
     tty: true
     stdin_open: true
-    secrets:
-      - cf_api_key
   playit:
     image: ghcr.io/playit-cloud/playit-agent:latest
 ```
