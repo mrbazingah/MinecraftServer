@@ -19,12 +19,13 @@ A self-hosted Minecraft server built from a repurposed desktop PC, running headl
  
 ## My setup process
  
-- First I found an old unused pc and tried installing Ubuntu Server on it. The motherboard couldn't read all the files that was on the flash drive I used so i opted instead on installing the ISO Image on a SSD.
-- After the installation and setup of the OS was done docker was then installed and with that a minecraft server image was added as a container.
-- Using the `compose.yaml` file I set up the mc service and environment.
-- **CurseForge API errors (HTTP 403):** confirmed the API key was valid by testing it directly with `curl`, then used debug logs to identify request throttling during the modpack install.
-- **Server stopping right after start:** read `latest.log` and used `docker inspect` (exit code, OOM status) to find an incompatible world from an earlier server version.
-- **Exposing the server without router access:** used playit.gg tunnels instead of port forwarding, since I don't control the router.
+- First I found an old unused PC and tried installing Ubuntu Server on it. The installer booted but couldn’t find its files on the USB stick, likely a USB compatibility issue with the older board. After ruling out ports, BIOS settings and the ISO, I wrote the installer to a spare SSD, which worked.
+- After the installation and setup of the OS was done i installed Docker and with that a Minecraft server image was added as a container.
+- Using the `compose.yaml` file I set up the mc service and environment. It was at this step I installed mods on to the server with fabric.
+- I used `scp` to send the modpack from my PC to the server and then added the proper API key and CF settings to the environment and tested.
+- The server failed with an API key error. The log said dollar signs had to be escaped, so I doubled every $ in the key. It still failed with HTTP 403, so I tested the key directly against the CurseForge API with curl and got 200, which meant the key itself was valid. Debug logging showed that one request in a burst was being refused, so the real cause was rate limiting, made worse by the container’s restart loop. I stopped the container, waited for the limit to reset, and the install went through.
+- After the API problem was fixed I went on and installed performance enhancing mods that alleviate some of the work for the cpu and ram. I then sent the new modpack to the server again using `scp` and tested it.
+
 ## Connect
  
 | Command | Description |
@@ -98,7 +99,8 @@ Use these in the server console, or in-game chat with a `/` in front.
 | `wakepc` (or `wakeonlan 34:5A:60:6F:E8:F4`) | Wake up the main PC |
 
 ## Docker compose.yaml File
-```services:
+```
+services:
   mc:
     image: itzg/minecraft-server:java21
     container_name: minecraft
@@ -107,7 +109,7 @@ Use these in the server console, or in-game chat with a `/` in front.
     environment:
       EULA: "TRUE"
       TYPE: "AUTO_CURSEFORGE"
-      CF_API_KEY: "$$2a$$10$$UpWS3sao8ZEZYcrjdJ8bc.zS3oMqqXdl6PewdOo7lGoF37lk3vPYq"
+      CF_API_KEY: "$$2a$$10$$<rest-of-api-key-here>"
       CF_SLUG: "custom"
       CF_FORCE_SYNCHRONIZE: "true"
       CF_MODPACK_ZIP: "/data/OriginsPack.zip"
