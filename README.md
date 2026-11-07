@@ -98,7 +98,7 @@ Use these in the server console, or in-game chat with a `/` in front.
 | `wakepc` (or `wakeonlan 34:5A:60:6F:E8:F4`) | Wake up the main PC |
 
 ## Docker compose.yaml File
-`services:
+```services:
   mc:
     image: itzg/minecraft-server:java21
     container_name: minecraft
@@ -123,4 +123,5 @@ Use these in the server console, or in-game chat with a `/` in front.
     secrets:
       - cf_api_key
   playit:
-    image: ghcr.io/playit-cloud/playit-agent:latest`
+    image: ghcr.io/playit-cloud/playit-agent:latest
+```
