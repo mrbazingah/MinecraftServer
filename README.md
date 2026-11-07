@@ -4,23 +4,24 @@ A self-hosted Minecraft server built from a repurposed desktop PC, running headl
  
 ## Setup
  
-| Part | Details |
+| Hardware and Tools | Details |
 |---|---|
 | CPU | Intel Core i7-3770K |
 | RAM | 16 GB DDR3 |
 | Motherboard | MSI Z77A-GD65 |
-| Storage | 2 x 128 GB SATA SSD (OS + apps), 1 TB HDD (storage) |
-| OS | Ubuntu Server 24.04 LTS (headless) |
+| Storage | 2 x 128 GB SATA SSD |
+| OS | Ubuntu Server 24.04 LTS |
 | Containers | Docker + Docker Compose, `itzg/minecraft-server` image |
 | Game | Minecraft 1.20.1, Fabric, custom CurseForge modpack |
 | Public access | playit.gg tunnels (TCP for the game, UDP for Simple Voice Chat) |
 | Remote admin | Tailscale VPN, SSH, Cockpit web console |
 | Extras | Wake-on-LAN for waking my main PC remotely |
  
-## Problems solved along the way
+## My setup process
  
-- **No POST / no display:** traced to a missing CMOS battery and iGPU display settings in the BIOS.
-- **Installer could not find the live file system:** worked through USB ports, BIOS USB settings, media verification and a different Ubuntu release.
+- First I found an old unused pc and tried installing Ubuntu Server on it. The motherboard couldn't read all the files that was on the flash drive I used so i opted instead on installing the ISO Image on a SSD.
+- After the installation and setup of the OS was done docker was then installed and with that a minecraft server image was added as a container.
+- Using the <compose.yaml> file
 - **CurseForge API errors (HTTP 403):** confirmed the API key was valid by testing it directly with `curl`, then used debug logs to identify request throttling during the modpack install.
 - **Server stopping right after start:** read `latest.log` and used `docker inspect` (exit code, OOM status) to find an incompatible world from an earlier server version.
 - **Exposing the server without router access:** used playit.gg tunnels instead of port forwarding, since I don't control the router.
